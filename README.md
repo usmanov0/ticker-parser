@@ -6,7 +6,7 @@ This project is a Go application that fetches cryptocurrency prices from the Bin
 • Fetches prices for multiple cryptocurrency symbols from the Binance API.
 • Uses worker goroutines to handle concurrent requests.
 • Monitors and logs the number of requests made.
-• Graceful shutdown handling using context and signals.
+• Graceful shutdown handling using context and signals. 
 
 ## Prerequisites
 • Internet connection to access the Binance API.
