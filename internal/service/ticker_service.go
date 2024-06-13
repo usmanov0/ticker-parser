@@ -11,7 +11,7 @@ import (
 type TickerService struct {
 	repo    domain.TickerRepository
 	Symbols []string
-	count   int
+	count   int //  у тебя конкурентный доступ - стоит скрывать за мьютексом или использовать атомик
 	prices  map[string]string
 }
 
@@ -30,16 +30,16 @@ func (s *TickerService) Run(ctx context.Context, wg *sync.WaitGroup) {
 			log.Println("Stopping worker")
 			return
 		default:
-			for _, symbol := range s.Symbols {
+			for _, symbol := range s.Symbols { // лучше селект ставить внутри цикла, а то если символов много, придется ждать пока они все отработают прежде чем выйдешь по контектсу
 				price, err := s.repo.FetchPrice(symbol)
 				if err != nil {
 					fmt.Printf("Error fetching price for %s: %v\n", symbol, err)
 					continue
 				}
-				s.count++
-				if prevPrice, exists := s.prices[symbol]; exists {
+				s.count++                                          // в условии задачи сказано, что каунтер считает и неудачные запросы
+				if prevPrice, exists := s.prices[symbol]; exists { // это можно и одним if else написать
 					if prevPrice != price {
-						fmt.Printf("%s price: %s changed\n", symbol, price)
+						fmt.Printf("%s price: %s changed\n", symbol, price) // в условии задачи сказано, что нельзя писать в консоль тут (кроме ошщибок)
 					} else {
 						fmt.Printf("%s price: %s\n", symbol, price)
 					}

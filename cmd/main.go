@@ -21,19 +21,20 @@ func main() {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	repo := adapter.NewBinanceRepository()
-	services := service.CreateServices(repo, config.Symbols, config.MaxWorkers)
+	repo := adapter.NewBinanceRepository()                                      // не понял почему это репо, если это клиент
+	services := service.CreateServices(repo, config.Symbols, config.MaxWorkers) // неудачное название - непонятно какие сервисы создаем
 
 	var wg sync.WaitGroup
 	ctx, cancel := context.WithCancel(context.Background())
 
 	worker.RunWorkers(services, ctx, &wg)
 
+	// в целом слишком много пакетов - разве воркер и мониторинг это не сервисы - как будто была плохая попытка замутить DDD (но потом некоторые сущности поехали в отдельные пакеты)
 	go monitor.MonitorRequests(services, ctx)
 	go input.WaitForStop(ctx, cancel)
 
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM) //YAGNY
 	go func() {
 		<-sigChan
 		cancel()
